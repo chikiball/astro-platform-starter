@@ -19,9 +19,9 @@ from collections import OrderedDict, defaultdict
 from pathlib import Path
 
 CSV_PATH = Path(
-    "/Users/nandha_handharu/Downloads/Keluarga H. Mardjono Siradj - Seluruh Keluarga.csv")
+    "/Users/nandha_handharu/Documents/Nandha/GitHub/astro-platform-starter/Keluarga H. Mardjono Siradj - Seluruh Keluarga.csv")
 OUT_PATH = Path(
-    "/Users/nandha_handharu/Downloads/index.html")
+    "/Users/nandha_handharu/Documents/Nandha/GitHub/astro-platform-starter/index.html")
 
 # ── Parse CSV ─────────────────────────────────────────────────────────────────
 
