@@ -58,6 +58,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(10,10,20,0.95);color:#e0e0e0;padding:12px 16px;border-radius:6px;font-size:0.8em;white-space:nowrap;z-index:9999;border:1px solid #d4af37;box-shadow:0 4px 20px rgba(0,0,0,0.8);opacity:0;pointer-events:none;transition:opacity 0.15s;text-align:left;line-height:1.5}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#d4af37}
 .couple:hover .tip{opacity:1}
+.tip.visible{opacity:1;pointer-events:auto}
 .tip .tname{color:#d4af37;font-weight:600;font-size:1em;display:block;margin-bottom:4px}
 .tip .trow{color:#ccc}.tip .tlbl{color:#888}
 .multi-branches{display:flex;justify-content:center;gap:0;padding-top:20px;position:relative}
@@ -364,6 +365,24 @@ function applyZoom(){
 function zoomIn(){ zoomLevel = Math.min(200, zoomLevel+10); applyZoom(); }
 function zoomOut(){ zoomLevel = Math.max(20, zoomLevel-10); applyZoom(); }
 function zoomReset(){ zoomLevel = 100; applyZoom(); }
+
+// ── Click/tap to toggle tooltip (for touch/smart devices) ────────────────────
+function closeAllTips(){
+  document.querySelectorAll('.tip.visible').forEach(t=>t.classList.remove('visible'));
+}
+
+document.addEventListener('click', function(e){
+  const couple = e.target.closest('.couple');
+  if(couple){
+    const tip = couple.querySelector('.tip');
+    if(!tip) return;
+    const isVisible = tip.classList.contains('visible');
+    closeAllTips();                          // close any other open tip
+    if(!isVisible) tip.classList.add('visible'); // toggle open
+  } else {
+    closeAllTips();                          // tap outside → close all
+  }
+});
 
 updateDashboard();
 renderTree();
