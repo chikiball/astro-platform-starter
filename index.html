@@ -26,13 +26,19 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .brow{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.05)}
 .brow:last-child{border-bottom:none}
 .brow .bl{color:#b8956a}.brow .bv{color:#d4af37;font-weight:600}
-.tree-toolbar{display:flex;gap:10px;margin-bottom:15px;align-items:center;flex-wrap:wrap}
+.tree-toolbar{display:flex;gap:8px;margin-bottom:15px;align-items:center;flex-wrap:nowrap}
 .tree-toolbar input{flex:1;min-width:200px;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
 .tree-toolbar input::placeholder{color:#666}
-.tree-toolbar button,.action-btn{padding:10px 20px;background:#2d7d6e;color:#d4af37;border:none;border-radius:4px;cursor:pointer;font-weight:600;transition:all 0.3s}
+.tree-toolbar button,.action-btn{padding:10px 20px;background:#2d7d6e;color:#d4af37;border:none;border-radius:4px;cursor:pointer;font-weight:600;transition:all 0.3s;white-space:nowrap}
 .tree-toolbar button:hover,.action-btn:hover{background:#3d8d7e}
-.tree-wrap{overflow:auto;background:rgba(0,0,0,0.2);border:1px solid rgba(45,125,110,0.3);border-radius:8px;padding:30px;max-height:80vh}
-.tree-wrap-inner{display:inline-block;min-width:100%}
+.search-bar{display:flex;gap:8px;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width 0.35s ease,opacity 0.25s ease;flex-shrink:0}
+.search-bar.open{max-width:600px;opacity:1}
+.search-bar input{width:200px;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
+.search-bar input::placeholder{color:#666}
+.tree-wrap{overflow:hidden;background:rgba(0,0,0,0.2);border:1px solid rgba(45,125,110,0.3);border-radius:8px;max-height:80vh;position:relative;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.tree-wrap.grabbing{cursor:grabbing}
+.tree-wrap-inner{display:inline-block;min-width:100%;transform-origin:0 0;will-change:transform}
+.abbr-box{color:#d4af37;font-size:0.75em;font-weight:700;letter-spacing:0.03em}
 .ftree{display:flex;flex-direction:column;align-items:center;min-width:max-content;padding:0 40px}
 .ftree ul{display:flex;padding-top:20px;position:relative;transition:all 0.5s}
 .ftree ul::before{content:'';position:absolute;top:0;left:50%;border-left:2px solid #2d7d6e;height:20px}
@@ -94,7 +100,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
   <div class="header">
     <h1>✨ Bani H. Siradj Mardjono ✨</h1>
     <p>Silsilah Keluarga — Islamic Heritage Family Archive</p>
-    <p style="color:#666;font-size:0.75em;margin-top:6px">Updated on 23/Mar/2026 08:41:03</p>
+    <p style="color:#666;font-size:0.75em;margin-top:6px">Updated on 23/Mar/2026 09:10:52</p>
   </div>
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab(0,this)">📊 Dashboard</button>
@@ -113,16 +119,21 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
   </div>
   <div id="tab-1" class="tab-panel">
     <div class="tree-toolbar">
-      <input id="search-in" placeholder="Search by name..." onkeyup="if(event.key==='Enter')doSearch()"/>
-      <button onclick="doSearch()">🔍 Search</button>
-      <button onclick="clearSearch()" style="background:#555">✕ Clear</button>
+      <button onclick="toggleSearch()" title="Search">🔍</button>
+      <div class="search-bar" id="search-bar">
+        <input id="search-in" placeholder="Search by name..." onkeyup="if(event.key==='Enter')doSearch()"/>
+        <button onclick="doSearch()">Go</button>
+        <button onclick="clearSearch()" style="background:#555">✕</button>
+      </div>
       <button onclick="expandAll()">Expand All</button>
       <button onclick="collapseAll()">Collapse All</button>
-      <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 4px"></span>
-      <button onclick="zoomOut()">− Zoom</button>
-      <span id="zoom-level" style="color:#d4af37;font-size:0.85em;min-width:40px;text-align:center">100%</span>
-      <button onclick="zoomIn()">+ Zoom</button>
-      <button onclick="zoomReset()">↺ Reset</button>
+      <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 4px;flex-shrink:0"></span>
+      <button onclick="zoomOut()">−</button>
+      <span id="zoom-level" style="color:#d4af37;font-size:0.85em;min-width:36px;text-align:center;flex-shrink:0">100%</span>
+      <button onclick="zoomIn()">+</button>
+      <button onclick="zoomReset()">↺</button>
+      <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 4px;flex-shrink:0"></span>
+      <button onclick="toggleAbbr()" id="abbr-btn" title="Toggle abbreviations">Abbr</button>
     </div>
     <div class="tree-wrap">
       <div class="tree-wrap-inner">
@@ -194,7 +205,10 @@ function nameBox(code, isBlood){
   if(!e) return '';
   const cls = isBlood ? 'blood' : 'nonblood';
   const dead = isDead(e) ? '<span class="di"> 🕊</span>' : '';
-  return '<div class="pbox '+cls+'">'+esc(e.name)+dead+'</div>';
+  const label = showAbbr
+    ? '<span class="abbr-box">'+esc(toAbbr(e.name))+'</span>'
+    : esc(e.name);
+  return '<div class="pbox '+cls+'">'+label+dead+'</div>';
 }
 
 function renderBranch(pCode){
@@ -302,7 +316,7 @@ function doSearch(){
     for(const[c,e]of Object.entries(S)){if(e.name.toLowerCase().includes(q))searchHits.add(c);}
   }
   renderTree();
-  if(searchHits.size>0){expandAll();setTimeout(()=>{const el=document.querySelector('.search-hit');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}
+  if(searchHits.size>0){expandAll();setTimeout(()=>{ panToHit(); },150);}
 }
 function clearSearch(){document.getElementById('search-in').value='';searchHits.clear();renderTree();}
 
@@ -356,16 +370,157 @@ function onFileSelect(e){
   };r.readAsText(f);}
 }
 
-let zoomLevel = 100;
-function applyZoom(){
-  const inner = document.querySelector('.tree-wrap-inner');
-  inner.style.transform = 'scale('+(zoomLevel/100)+')';
-  inner.style.transformOrigin = 'top left';
-  document.getElementById('zoom-level').textContent = zoomLevel+'%';
+// ── Transform state ───────────────────────────────────────────────────────────
+let tx = 0, ty = 0, scale = 1;
+const MIN_SCALE = 0.2, MAX_SCALE = 2.5;
+
+function applyTransform(){
+  document.querySelector('.tree-wrap-inner').style.transform =
+    'translate('+tx+'px,'+ty+'px) scale('+scale+')';
+  document.getElementById('zoom-level').textContent = Math.round(scale*100)+'%';
 }
-function zoomIn(){ zoomLevel = Math.min(200, zoomLevel+10); applyZoom(); }
-function zoomOut(){ zoomLevel = Math.max(20, zoomLevel-10); applyZoom(); }
-function zoomReset(){ zoomLevel = 100; applyZoom(); }
+
+// ── Button zoom (keeps existing toolbar buttons working) ─────────────────────
+let zoomLevel = 100;
+function zoomIn(){ scale = Math.min(MAX_SCALE, scale+0.1); applyTransform(); }
+function zoomOut(){ scale = Math.max(MIN_SCALE, scale-0.1); applyTransform(); }
+function zoomReset(){ scale=1; tx=0; ty=0; applyTransform(); }
+
+// ── Pan + Pinch via PointerEvents ────────────────────────────────────────────
+(function(){
+  const wrap = document.querySelector('.tree-wrap');
+  const pointers = new Map();
+  let lastDist = null;
+  let panStart = null;
+
+  function midpoint(a, b){
+    return { x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2 };
+  }
+  function dist(a, b){
+    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+  }
+
+  wrap.addEventListener('pointerdown', e=>{
+    pointers.set(e.pointerId, e);
+    wrap.setPointerCapture(e.pointerId);
+    wrap.classList.add('grabbing');
+    if(pointers.size === 1){
+      panStart = { x: e.clientX - tx, y: e.clientY - ty };
+    }
+    lastDist = null;
+  });
+
+  wrap.addEventListener('pointermove', e=>{
+    pointers.set(e.pointerId, e);
+    if(pointers.size === 2){
+      // ── Pinch-to-zoom ──
+      const pts = [...pointers.values()];
+      const d = dist(pts[0], pts[1]);
+      if(lastDist !== null){
+        const delta = d / lastDist;
+        const mid = midpoint(pts[0], pts[1]);
+        const rect = wrap.getBoundingClientRect();
+        // Zoom toward pinch midpoint
+        const ox = mid.x - rect.left;
+        const oy = mid.y - rect.top;
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * delta));
+        tx = ox - (ox - tx) * (newScale / scale);
+        ty = oy - (oy - ty) * (newScale / scale);
+        scale = newScale;
+        applyTransform();
+      }
+      lastDist = d;
+    } else if(pointers.size === 1 && panStart){
+      // ── Pan ──
+      tx = e.clientX - panStart.x;
+      ty = e.clientY - panStart.y;
+      applyTransform();
+    }
+  });
+
+  function onUp(e){
+    pointers.delete(e.pointerId);
+    if(pointers.size < 2) lastDist = null;
+    if(pointers.size === 0){
+      wrap.classList.remove('grabbing');
+      panStart = null;
+    } else if(pointers.size === 1){
+      // Restart pan anchor from remaining pointer
+      const remaining = [...pointers.values()][0];
+      panStart = { x: remaining.clientX - tx, y: remaining.clientY - ty };
+    }
+  }
+  wrap.addEventListener('pointerup', onUp);
+  wrap.addEventListener('pointercancel', onUp);
+
+  // ── Mouse-wheel zoom ─────────────────────────────────────────────────────
+  wrap.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const rect = wrap.getBoundingClientRect();
+    const ox = e.clientX - rect.left;
+    const oy = e.clientY - rect.top;
+    const delta = e.deltaY < 0 ? 1.1 : 0.9;
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * delta));
+    tx = ox - (ox - tx) * (newScale / scale);
+    ty = oy - (oy - ty) * (newScale / scale);
+    scale = newScale;
+    applyTransform();
+  }, { passive: false });
+
+  // ── Double-tap to re-centre ───────────────────────────────────────────────
+  let lastTap = 0;
+  wrap.addEventListener('pointerdown', e=>{
+    if(pointers.size > 1) return;
+    const now = Date.now();
+    if(now - lastTap < 300){
+      scale=1; tx=0; ty=0; applyTransform();
+    }
+    lastTap = now;
+  });
+})();
+
+// ── Collapsible search bar ────────────────────────────────────────────────────
+function toggleSearch(){
+  const bar = document.getElementById('search-bar');
+  const isOpen = bar.classList.toggle('open');
+  if(isOpen) document.getElementById('search-in').focus();
+  else clearSearch();
+}
+
+// ── Auto-pan to search hit ────────────────────────────────────────────────────
+function panToHit(){
+  const el = document.querySelector('.search-hit');
+  if(!el) return;
+  const wrap = document.querySelector('.tree-wrap');
+  const inner = document.querySelector('.tree-wrap-inner');
+  const wRect = wrap.getBoundingClientRect();
+  const eRect = el.getBoundingClientRect();
+  const iRect = inner.getBoundingClientRect();
+  // Element centre in inner-coordinate space
+  const elCx = (eRect.left - iRect.left) / scale + (eRect.width / scale) / 2;
+  const elCy = (eRect.top  - iRect.top)  / scale + (eRect.height/ scale) / 2;
+  // Target: centre of wrap
+  tx = wRect.width  / 2 - elCx * scale;
+  ty = wRect.height / 2 - elCy * scale;
+  applyTransform();
+}
+
+// ── Abbreviation toggle ───────────────────────────────────────────────────────
+let showAbbr = false;
+
+function toAbbr(name){
+  // Strip Islamic honorifics: H. / Hj. at the start (case-insensitive)
+  const stripped = name.replace(/^(H\.|Hj\.)\s*/i, '').trim();
+  // Take first letter of each word
+  return stripped.split(/\s+/).map(w => w[0] ? w[0].toUpperCase() : '').join('');
+}
+
+function toggleAbbr(){
+  showAbbr = !showAbbr;
+  document.getElementById('abbr-btn').style.background = showAbbr ? '#d4af37' : '#2d7d6e';
+  document.getElementById('abbr-btn').style.color      = showAbbr ? '#1a1a2e' : '#d4af37';
+  renderTree();
+}
 
 // ── Click/tap to toggle tooltip (for touch/smart devices) ────────────────────
 function closeAllTips(){
