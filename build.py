@@ -249,14 +249,15 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .brow{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.05)}
 .brow:last-child{border-bottom:none}
 .brow .bl{color:#b8956a}.brow .bv{color:#d4af37;font-weight:600}
-.tree-toolbar{display:flex;gap:8px;margin-bottom:15px;align-items:center;flex-wrap:nowrap}
+.tree-toolbar{display:flex;flex-direction:column;gap:8px;margin-bottom:15px}
+.tree-toolbar-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tree-toolbar input{flex:1;min-width:200px;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
 .tree-toolbar input::placeholder{color:#666}
 .tree-toolbar button,.action-btn{padding:10px 20px;background:#2d7d6e;color:#d4af37;border:none;border-radius:4px;cursor:pointer;font-weight:600;transition:all 0.3s;white-space:nowrap}
 .tree-toolbar button:hover,.action-btn:hover{background:#3d8d7e}
-.search-bar{display:flex;gap:8px;align-items:center;overflow:hidden;max-width:0;opacity:0;transition:max-width 0.35s ease,opacity 0.25s ease;flex-shrink:0}
-.search-bar.open{max-width:600px;opacity:1}
-.search-bar input{width:200px;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
+.search-bar{display:flex;gap:8px;align-items:center;max-height:0;opacity:0;overflow:hidden;transition:max-height 0.35s ease,opacity 0.25s ease}
+.search-bar.open{max-height:60px;opacity:1}
+.search-bar input{flex:1;min-width:0;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
 .search-bar input::placeholder{color:#666}
 .tree-wrap{overflow:hidden;background:rgba(0,0,0,0.2);border:1px solid rgba(45,125,110,0.3);border-radius:8px;max-height:80vh;position:relative;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .tree-wrap.grabbing{cursor:grabbing}
@@ -342,21 +343,23 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
   </div>
   <div id="tab-1" class="tab-panel">
     <div class="tree-toolbar">
-      <button onclick="toggleSearch()" title="Search">🔍</button>
+      <div class="tree-toolbar-row">
+        <button onclick="toggleSearch()" title="Search">🔍</button>
+        <button onclick="expandAll()">Expand All</button>
+        <button onclick="collapseAll()">Collapse All</button>
+        <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 2px;flex-shrink:0"></span>
+        <button onclick="zoomOut()">−</button>
+        <span id="zoom-level" style="color:#d4af37;font-size:0.85em;min-width:36px;text-align:center;flex-shrink:0">100%</span>
+        <button onclick="zoomIn()">+</button>
+        <button onclick="zoomReset()">↺</button>
+        <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 2px;flex-shrink:0"></span>
+        <button onclick="toggleAbbr()" id="abbr-btn" title="Toggle abbreviations">Abbr</button>
+      </div>
       <div class="search-bar" id="search-bar">
         <input id="search-in" placeholder="Search by name..." onkeyup="if(event.key==='Enter')doSearch()"/>
         <button onclick="doSearch()">Go</button>
         <button onclick="clearSearch()" style="background:#555">✕</button>
       </div>
-      <button onclick="expandAll()">Expand All</button>
-      <button onclick="collapseAll()">Collapse All</button>
-      <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 4px;flex-shrink:0"></span>
-      <button onclick="zoomOut()">−</button>
-      <span id="zoom-level" style="color:#d4af37;font-size:0.85em;min-width:36px;text-align:center;flex-shrink:0">100%</span>
-      <button onclick="zoomIn()">+</button>
-      <button onclick="zoomReset()">↺</button>
-      <span style="border-left:1px solid #2d7d6e;height:24px;margin:0 4px;flex-shrink:0"></span>
-      <button onclick="toggleAbbr()" id="abbr-btn" title="Toggle abbreviations">Abbr</button>
     </div>
     <div class="tree-wrap">
       <div class="tree-wrap-inner">
