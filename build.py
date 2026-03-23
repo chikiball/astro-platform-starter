@@ -15,6 +15,7 @@ RULES:
 import csv
 import json
 import re
+from datetime import datetime
 from collections import OrderedDict, defaultdict
 from pathlib import Path
 
@@ -218,6 +219,7 @@ def generate(persons, spouses, marriages, spouse_of, children_of, children_via, 
 
 def write_html(data, out_path):
     data_json = json.dumps(data, ensure_ascii=False)
+    timestamp = datetime.now().strftime("%-d/%b/%Y %H:%M:%S")
 
     html = r'''<!DOCTYPE html>
 <html lang="en">
@@ -315,6 +317,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
   <div class="header">
     <h1>✨ Bani H. Siradj Mardjono ✨</h1>
     <p>Silsilah Keluarga — Islamic Heritage Family Archive</p>
+    <p style="color:#666;font-size:0.75em;margin-top:6px">Updated on ''' + timestamp + r'''</p>
   </div>
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab(0,this)">📊 Dashboard</button>
@@ -640,6 +643,7 @@ def main():
 
     print("Writing HTML…")
     write_html(data, OUT_PATH)
+    print(f"  Generated at: {datetime.now().strftime('%-d/%b/%Y %H:%M:%S')}")
     print(f"✓ Done → {OUT_PATH}")
     print(f"  Total persons in tree: {len(data['persons'])}")
     print(f"  Total spouses: {len(data['spouses'])}")
