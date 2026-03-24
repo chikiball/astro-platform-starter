@@ -7,9 +7,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#e0e0e0;min-height:100vh}
-.container{max-width:100%;margin:0 auto;background:rgba(26,26,46,0.95);min-height:100vh}
-.header{background:linear-gradient(135deg,rgba(45,125,110,0.8),rgba(212,175,55,0.1));padding:24px;text-align:center;border-bottom:2px solid #d4af37}
-.header h1{color:#d4af37;font-size:2em;text-shadow:2px 2px 4px rgba(0,0,0,0.5)}
+.container{max-width:100%;margin:0 auto;background:rgba(26,26,46,0.95);min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,rgba(45,125,110,0.8),rgba(212,175,55,0.1));padding:12px 20px;text-align:center;border-bottom:2px solid #d4af37}
+.header h1{color:#d4af37;font-size:clamp(1em,4vw,1.8em);text-shadow:2px 2px 4px rgba(0,0,0,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .header p{color:#b8956a;font-size:1em;margin-top:4px}
 .tabs{display:flex;border-bottom:2px solid #2d7d6e;background:rgba(0,0,0,0.3)}
 .tab-btn{flex:1;padding:14px;background:none;border:none;color:#888;font-size:1em;cursor:pointer;transition:all 0.3s}
@@ -17,6 +17,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .tab-btn.active{color:#d4af37;border-bottom:3px solid #d4af37;background:rgba(212,175,55,0.1)}
 .tab-panel{display:none;padding:20px}
 .tab-panel.active{display:block}
+#tab-1.active{display:flex;flex-direction:column;height:calc(100vh - var(--header-h, 100px))}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
 .stat-card{background:linear-gradient(135deg,rgba(45,125,110,0.15),rgba(212,175,55,0.05));padding:20px;border-radius:8px;text-align:center;border:1px solid rgba(45,125,110,0.3)}
 .stat-card h3{color:#b8956a;font-size:0.85em;margin-bottom:6px;text-transform:uppercase}
@@ -27,7 +28,9 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .brow:last-child{border-bottom:none}
 .brow .bl{color:#b8956a}.brow .bv{color:#d4af37;font-weight:600}
 .tree-toolbar{display:flex;flex-direction:column;gap:8px;margin-bottom:15px}
-.tree-toolbar-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tree-toolbar-row{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.tree-toolbar-row::-webkit-scrollbar{display:none}
+.tree-toolbar-row button{flex-shrink:0}
 .tree-toolbar input{flex:1;min-width:200px;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
 .tree-toolbar input::placeholder{color:#666}
 .tree-toolbar button,.action-btn{padding:10px 20px;background:#2d7d6e;color:#d4af37;border:none;border-radius:4px;cursor:pointer;font-weight:600;transition:all 0.3s;white-space:nowrap}
@@ -36,7 +39,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .search-bar.open{max-height:60px;opacity:1}
 .search-bar input{flex:1;min-width:0;padding:10px 15px;background:rgba(0,0,0,0.3);border:1px solid #2d7d6e;border-radius:4px;color:#e0e0e0;font-size:1em}
 .search-bar input::placeholder{color:#666}
-.tree-wrap{overflow:hidden;background:rgba(0,0,0,0.2);border:1px solid rgba(45,125,110,0.3);border-radius:8px;max-height:80vh;position:relative;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.tree-wrap{overflow:hidden;background:rgba(0,0,0,0.2);border:1px solid rgba(45,125,110,0.3);border-radius:8px;flex:1;min-height:0;position:relative;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .tree-wrap.grabbing{cursor:grabbing}
 .tree-wrap-inner{display:inline-block;min-width:100%;transform-origin:0 0;will-change:transform}
 .abbr-box{color:#d4af37;font-size:0.75em;font-weight:700;letter-spacing:0.03em}
@@ -52,6 +55,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .ftree li:last-child::before{border-right:2px solid #2d7d6e;border-radius:0 5px 0 0}
 .ftree li:first-child::after{border-radius:5px 0 0 0}
 .ftree ul ul::before{content:'';position:absolute;top:0;left:50%;border-left:2px solid #2d7d6e;height:20px}
+.ftree .couple{transition:opacity 0.25s ease,filter 0.25s ease}
 .couple{display:flex;align-items:center;gap:0;border:1px solid #2d7d6e;border-radius:6px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(45,125,110,0.08));position:relative;cursor:default;transition:all 0.2s;white-space:nowrap}
 .couple:hover{border-color:#d4af37;box-shadow:0 2px 12px rgba(212,175,55,0.2)}
 .pbox{padding:6px 12px;font-size:0.82em;position:relative}
@@ -62,9 +66,8 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 .couple.search-hit{background:rgba(212,175,55,0.25);border-color:#d4af37;box-shadow:0 0 12px rgba(212,175,55,0.4)}
 .tbtn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#2d7d6e;color:#d4af37;border:none;cursor:pointer;font-size:0.7em;margin-top:4px;transition:all 0.2s}
 .tbtn:hover{background:#d4af37;color:#1a1a2e}
-.tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(10,10,20,0.95);color:#e0e0e0;padding:12px 16px;border-radius:6px;font-size:0.8em;white-space:nowrap;z-index:9999;border:1px solid #d4af37;box-shadow:0 4px 20px rgba(0,0,0,0.8);opacity:0;pointer-events:none;transition:opacity 0.15s;text-align:left;line-height:1.5}
-.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#d4af37}
-.couple:hover .tip{opacity:1}
+.tip{position:fixed;background:#0a0a14;color:#e0e0e0;padding:12px 16px;border-radius:6px;font-size:0.8em;white-space:normal;overflow-wrap:break-word;word-break:normal;min-width:220px;max-width:min(360px,90vw);z-index:100000;border:1px solid #d4af37;box-shadow:0 8px 30px rgba(0,0,0,1);opacity:0;pointer-events:none;transition:opacity 0.15s;text-align:left;line-height:1.5}
+.tip::after{display:none}
 .tip.visible{opacity:1;pointer-events:auto}
 .tip .tname{color:#d4af37;font-weight:600;font-size:1em;display:block;margin-bottom:4px}
 .tip .trow{color:#ccc}.tip .tlbl{color:#888}
@@ -100,8 +103,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
 <div class="container">
   <div class="header">
     <h1>✨ Bani H. Siradj Mardjono ✨</h1>
-    <p>Silsilah Keluarga — Islamic Heritage Family Archive</p>
-    <p style="color:#666;font-size:0.75em;margin-top:6px">Updated on 23/Mar/2026 09:22:22</p>
+    <p style="color:#666;font-size:0.75em;margin-top:6px">Updated on 23/Mar/2026 17:02:19</p>
   </div>
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab(0,this)">📊 Dashboard</button>
@@ -143,6 +145,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,
         <div class="ftree" id="tree"></div>
       </div>
     </div>
+    <div id="floating-tip" class="tip"></div>
   </div>
   <div id="tab-2" class="tab-panel">
     <div class="ie-grid">
@@ -193,6 +196,9 @@ function tipHTML(code){
       if(sp) h+='<div class="trow"><span class="tlbl">Spouse: </span>'+esc(sp.name)+'</div>';
     });
   }
+  if(S[code] && S[code].of && P[S[code].of]){
+    h+='<div class="trow"><span class="tlbl">Spouse of: </span>'+esc(P[S[code].of].name)+'</div>';
+  }
   if(e.bd) h+='<div class="trow"><span class="tlbl">Born: </span>'+esc(e.bd)+(e.bp?' — '+esc(e.bp):'')+'</div>';
   else if(e.bp) h+='<div class="trow"><span class="tlbl">Birthplace: </span>'+esc(e.bp)+'</div>';
   if(e.dd) h+='<div class="trow"><span class="tlbl">Died: </span>'+esc(e.dd)+(e.dp?' — '+esc(e.dp):'')+'</div>';
@@ -221,8 +227,7 @@ function renderBranch(pCode){
   const hit = searchHits.has(pCode) || spouses.some(sc=>searchHits.has(sc));
   const isMulti = MM.has(pCode);
 
-  let coupleHTML = '<div class="couple'+(hit?' search-hit':'')+'">';
-  coupleHTML += '<div class="tip">'+tipHTML(pCode)+'</div>';
+  let coupleHTML = '<div class="couple'+(hit?' search-hit':'')+'" data-code="'+pCode+'">';
 
   if(isMulti && spouses.length >= 2){
     // Single merged couple box: [Spouse1] = [Person] = [Spouse2]
@@ -322,6 +327,55 @@ function doSearch(){
   if(searchHits.size>0){expandAll();setTimeout(()=>{ panToHit(); },150);}
 }
 function clearSearch(){document.getElementById('search-in').value='';searchHits.clear();renderTree();}
+
+// ── Fisheye depth effect (layout-safe: no transform on individual nodes) ─────
+(function(){
+  const wrap = document.querySelector('.tree-wrap');
+
+  function applyFisheye(){
+    const wRect = wrap.getBoundingClientRect();
+    const cx = wRect.left + wRect.width  / 2;
+    const cy = wRect.top  + wRect.height / 2;
+    const maxD = Math.hypot(wRect.width, wRect.height) / 2;
+
+    document.querySelectorAll('.ftree .couple').forEach(el=>{
+      const r = el.getBoundingClientRect();
+      // Skip elements with zero size (not rendered / off-screen)
+      if(r.width === 0 && r.height === 0) return;
+      const ex = r.left + r.width  / 2;
+      const ey = r.top  + r.height / 2;
+      const d  = Math.hypot(ex - cx, ey - cy);
+      const t  = Math.min(d / (maxD * 1.2), 1);
+      // opacity: 1.0 at centre → 0.55 at far edge
+      const o  = 1 - t * 0.45;
+      // brightness: 100% at centre → 60% at far edge (dims without hiding)
+      const b  = 1 - t * 0.4;
+      el.style.opacity = o.toFixed(3);
+      el.style.filter  = 'brightness('+b.toFixed(3)+')';
+    });
+  }
+
+  const inner = document.querySelector('.tree-wrap-inner');
+  const obs = new MutationObserver(applyFisheye);
+  obs.observe(inner, { attributes: true, attributeFilter: ['style'] });
+
+  wrap.addEventListener('scroll', applyFisheye, { passive: true });
+  window.addEventListener('resize', applyFisheye, { passive: true });
+
+  setTimeout(applyFisheye, 200);
+})();
+
+// ── Measure header+tabs height so tree panel fills remaining screen ──────────
+(function(){
+  function setHeaderVar(){
+    const header = document.querySelector('.header');
+    const tabs   = document.querySelector('.tabs');
+    const h = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  setHeaderVar();
+  window.addEventListener('resize', setHeaderVar, { passive: true });
+})();
 
 function updateDashboard(){
   const allP=Object.values(P);
@@ -525,23 +579,95 @@ function toggleAbbr(){
   renderTree();
 }
 
-// ── Click/tap to toggle tooltip (for touch/smart devices) ────────────────────
-function closeAllTips(){
-  document.querySelectorAll('.tip.visible').forEach(t=>t.classList.remove('visible'));
+// ── Hover + Click/tap tooltip with smart positioning ─────────────────────────
+// closeAllTips is now replaced by closeTip() above
+
+// ── Single floating tooltip outside the transform ────────────────────────────
+const floatingTip = document.getElementById('floating-tip');
+let tipPinned = false;
+
+function closeTip(){
+  floatingTip.classList.remove('visible');
+  floatingTip.innerHTML = '';
+  tipPinned = false;
 }
 
+function showTip(code, px, py){
+  const html = tipHTML(code);
+  if(!html){ closeTip(); return; }
+  floatingTip.innerHTML = html;
+
+  // Measure off-screen
+  floatingTip.style.left = '-9999px';
+  floatingTip.style.top  = '0';
+  floatingTip.classList.add('visible');
+  const tw = floatingTip.offsetWidth;
+  const th = floatingTip.offsetHeight;
+  floatingTip.classList.remove('visible');
+
+  const pad = 12;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Prefer above pointer, centred
+  let left = px - tw / 2;
+  let top  = py - th - pad;
+
+  // No room above → show below
+  if(top < pad) top = py + pad;
+
+  // Clamp
+  if(left < pad) left = pad;
+  if(left + tw > vw - pad) left = vw - pad - tw;
+  if(top + th > vh - pad) top = vh - pad - th;
+  if(top < pad) top = pad;
+
+  floatingTip.style.left = left + 'px';
+  floatingTip.style.top  = top  + 'px';
+  floatingTip.classList.add('visible');
+}
+
+function getCoupleCode(couple){
+  // Read the person code from the couple's tip div data, or find it from the DOM
+  const tipDiv = couple.querySelector('.tip');
+  if(tipDiv && tipDiv.dataset.code) return tipDiv.dataset.code;
+  return null;
+}
+
+// Click/tap
 document.addEventListener('click', function(e){
+  if(e.target.closest('.tbtn')) return; // don't interfere with toggle buttons
   const couple = e.target.closest('.couple');
   if(couple){
-    const tip = couple.querySelector('.tip');
-    if(!tip) return;
-    const isVisible = tip.classList.contains('visible');
-    closeAllTips();                          // close any other open tip
-    if(!isVisible) tip.classList.add('visible'); // toggle open
+    const code = couple.dataset.code;
+    if(!code){ closeTip(); return; }
+    if(tipPinned && floatingTip.dataset.code === code){
+      closeTip();
+    } else {
+      showTip(code, e.clientX, e.clientY);
+      floatingTip.dataset.code = code;
+      tipPinned = true;
+    }
   } else {
-    closeAllTips();                          // tap outside → close all
+    closeTip();
   }
 });
+
+// Hover (desktop)
+document.addEventListener('mouseenter', function(e){
+  if(tipPinned) return;
+  const couple = e.target.closest('.couple');
+  if(!couple) return;
+  const code = couple.dataset.code;
+  if(code) showTip(code, e.clientX, e.clientY);
+}, true);
+
+document.addEventListener('mouseleave', function(e){
+  if(tipPinned) return;
+  const couple = e.target.closest('.couple');
+  if(!couple) return;
+  closeTip();
+}, true);
 
 updateDashboard();
 renderTree();
